@@ -2,15 +2,16 @@ ARG BASE_VERSION=8.3.0-2.1.2
 FROM alpine:3.22.2 AS downloader
 
 WORKDIR /tmp
-RUN wget https://github.com/ksmartdata/mgr-operator/archive/refs/heads/package.zip -O mgr-operator.zip && \
-    unzip mgr-operator.zip && \
-    wget https://github.com/ksmartdata/mysql-operator/archive/refs/heads/extra_image.zip -O extra_image.zip && \
-    unzip extra_image.zip
+RUN wget -q https://github.com/ksmartdata/mgr-operator/archive/refs/heads/package.zip -O mgr-operator.zip && \
+    unzip -q mgr-operator.zip && \
+    wget -q https://github.com/ksmartdata/mysql-operator/archive/refs/heads/extra_image.zip -O extra_image.zip && \
+    unzip -q extra_image.zip
 
 FROM golang:1.23.3-alpine AS builder
 USER root
 COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/go.mod ./
-RUN go mod tidy && go mod download
+COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/go.sum ./
+RUN go mod download
 
 COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/ /mgr-diagnose/
 WORKDIR /mgr-diagnose
