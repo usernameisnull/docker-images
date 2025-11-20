@@ -11,13 +11,12 @@ FROM golang:1.23.3-alpine AS builder
 USER root
 COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/go.mod ./
 COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/go.sum ./
-RUN go mod download
+RUN go mod tidy && go mod download
 
 COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/ /mgr-diagnose/
 WORKDIR /mgr-diagnose
+RUN go mod tidy
 RUN CGO_ENABLED=0 go build -trimpath -ldflags "-w -s" -o /usr/local/bin/diagnose daocloud.io/mcamel/mgr-diagnose
-RUN chmod +x /usr/local/bin/diagnose
-
 
 FROM container-registry.oracle.com/mysql/community-operator:${BASE_VERSION}
 ARG BASE_VERSION
