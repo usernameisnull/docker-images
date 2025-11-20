@@ -9,12 +9,12 @@ RUN wget https://github.com/ksmartdata/mgr-operator/archive/refs/heads/package.z
 
 FROM golang:1.23.3-alpine AS builder
 USER root
-COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/go.mod /tmp/mysql-operator-extra_image/mgr-diagnose/go.sum ./
+COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/go.mod ./
+COPY --from=downloader /tmp/mysql-operator-extra_image/mgr-diagnose/go.sum ./
 RUN go mod download
 
 COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/ /mgr-diagnose/
 WORKDIR /mgr-diagnose
-RUN go mod download
 RUN CGO_ENABLED=0 go build -trimpath -ldflags "-w -s" -o /usr/local/bin/diagnose daocloud.io/mcamel/mgr-diagnose
 RUN chmod +x /usr/local/bin/diagnose
 
