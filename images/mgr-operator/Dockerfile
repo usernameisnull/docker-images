@@ -10,8 +10,7 @@ RUN wget https://github.com/ksmartdata/mgr-operator/archive/refs/heads/package.z
 FROM golang:1.23.3-alpine AS builder
 USER root
 COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/go.mod ./
-COPY --from=downloader /tmp/mysql-operator-extra_image/mgr-diagnose/go.sum ./
-RUN go mod download
+RUN go mod tidy && go mod download
 
 COPY --from=downloader /tmp/mysql-operator-extra_image/images/mgr-diagnose/ /mgr-diagnose/
 WORKDIR /mgr-diagnose
